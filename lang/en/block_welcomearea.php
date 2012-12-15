@@ -60,3 +60,8 @@ $string['removesuccess']    = 'Rule Removed';
 $string['removeerror']      = 'Error Removing Rule';
 $string['rulesuccess']      = 'Rule Added';
 $string['ruleerror']        = 'Error Adding Rule';
+
+// welcome area permissions
+
+$string['welcomearea:manageownarea'] = 'Manage own Welcome area';
+$string['welcomearea:managedefault'] = 'Manage default Welcome area';

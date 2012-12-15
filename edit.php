@@ -11,22 +11,51 @@ require_once($CFG->libdir . '/weblib.php');
 require_once("$CFG->dirroot/blocks/welcomearea/form.php");
 require_once("$CFG->dirroot/blocks/welcomearea/lib.php");
 
-global $CFG, $USER;
+//global $CFG, $USER, $DB;
 
 $courseid = optional_param('courseid', 0, PARAM_INT);   // Block passes the course id so we can get some context.
 $ownerid  = optional_param('ownerid', 0, PARAM_INT);    // Id of user of message area that is being edited.
 $default  = optional_param('default', 0, PARAM_INT);    // flag for editing the default
 
-$COURSE = get_record('course', 'id', $courseid);          // COURSE object
+require_login();
 
-$context        = get_context_instance(CONTEXT_COURSE, $courseid);
-$sitecontext    = get_context_instance(CONTEXT_SYSTEM, SITEID);
+if ($courseid == SITEID) {
+    $courseid = 0;
+}
+if ($courseid) {
+    $course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
+    $PAGE->set_course($course);
+    $context = $PAGE->context;
+} else {
+    $context = get_context_instance(CONTEXT_SYSTEM);
+    $PAGE->set_context($context);
+}
+
+$urlparams = array();
+if ($courseid) {
+    $urlparams['courseid'] = $courseid;
+}
+if ($ownerid) {
+    $urlparams['ownerid'] = $ownerid;
+}
+if ($default) {
+    $urlplarams['default'] = $default;
+}
+$url = new moodle_url('/block/welcomarea/edit.php', $urlparams);
+$PAGE->set_url($url);
 
 $title = get_string('editortitle', 'block_welcomearea');
-$nav = array ();
-$nav[] = array( 'name' => $title );
 
-print_header($title, $title, build_navigation($nav));
+$PAGE->set_pagelayout('standard');
+$PAGE->set_title($title);
+$PAGE->set_heading($title);
+$PAGE->navbar->add(get_string('blocks'));
+$PAGE->navbar->add(get_string('pluginname', 'block_welcomearea'));
+$PAGE->navbar->add($title);
+
+echo $OUTPUT->header();
+
+require_capability('block/welcomearea:manageownarea', $context);
 
 $mform = new welcomearea_form();
 
@@ -34,43 +63,44 @@ if($mform->is_cancelled()) {
 
     // if the form is cancelled, send them back to the course
 
-    notify(get_string('nochange', 'block_welcomearea'));
+    echo $OUTPUT->notification(get_string('nochange', 'block_welcomearea'));
 
-    redirect($CFG->wwwroot . '/course/view.php?id=' . $courseid);
+    echo $OUTPUT->continue_button(new moodle_url('/course/view.php', array('id'=>$courseid)));
+    echo $OUTPUT->footer();
+    die;
 
 } elseif ($fromform=$mform->get_data()) {
 
     // this section handles the submitted form. We should probably revalidate that the user is a teacher.
 
     $courseid       = $fromform->courseid;
-    $welcometext    = $fromform->text;
+    $welcometext    = $fromform->text["text"];
     $ownerid        = $fromform->ownerid;
 
-    if (has_capability('moodle/site:doanything', $sitecontext) ||                           // teacher (and editing their own message) or admin?
+    if (has_capability('block/welcomearea:managedefault', $context) ||                           // teacher (and editing their own message) or admin?
             (has_capability('moodle/course:update', $context) and ($ownerid == $USER->id))) {
 
         if (welcomearea_setcontent($ownerid, $welcometext)) {
-
-            notify(get_string('confirmation', 'block_welcomearea'), 'notifysuccess');     // if it works, give a confirmation
-
+            echo $OUTPUT->notification(get_string('confirmation', 'block_welcomearea'), 'notifysuccess');     // if it works, give a confirmation
         } else {
-
-            notify(get_string('editerror', 'block_welcomearea'));                       // if it doesn't work, give an error message
-
+            echo $OUTPUT->notification(get_string('editerror', 'block_welcomearea'));                       // if it doesn't work, give an error message
         }
 
-        redirect($CFG->wwwroot . '/course/view.php?id=' . $courseid);
+        echo $OUTPUT->continue_button(new moodle_url('/course/view.php', array('id'=>$courseid)));
+        echo $OUTPUT->footer();
+        die;
+    }
 
-    } 
-
-    notify(get_string('error', 'block_welcomearea'));       // if the user is neither a teacher or admin, give them and error
-    redirect($CFG->wwwroot);                                // and get them out of here
+    echo $OUTPUT->notification(get_string('error', 'block_welcomearea'));       // if the user is neither a teacher or admin, give them and error
+    echo $OUTPUT->continue_button(new moodle_url());
+    echo $OUTPUT->footer();
+    die;
 
 } else {
 
-    // this section handles the printing the form (i.e. it hasn't been cancelled and hasn't bee submitted)
+    // this section handles the printing the form (i.e. it hasn't been cancelled and hasn't been submitted)
 
-    if ($default && has_capability('moodle/site:doanything', $sitecontext)) {
+    if ($default && has_capability('block/welcomearea:managedefault', $context)) {
 
         welcomearea_links('editingdefault', $courseid);         // print our links for editing the default
 
@@ -80,21 +110,24 @@ if($mform->is_cancelled()) {
 
     } else {
 
-        notify(get_string('error', 'block_welcomearea'));       // if the user is neither a teacher or admin, give them and error
-        redirect($CFG->wwwroot);                                // and get them out of here
+        echo $OUTPUT->notification(get_string('error', 'block_welcomearea'));       // if the user is neither a teacher or admin, give them and error
+        echo $OUTPUT->continue_button(new moodle_url());
+        echo $OUTPUT->footer();
+        die;
 
     }
 
     $welcomearea = welcomearea_getcontent($ownerid);
-    $toform = array(    'courseid' => $courseid,
-            'ownerid' => $ownerid,
-            'text' => $welcomearea->content );
+    $toform = new stdClass;
+    $toform->courseid = $courseid;
+    $toform->ownerid = $ownerid;
+    $toform->text["text"] = $welcomearea->content;
 
     $mform->set_data($toform);                                  // set the default values
     $mform->display();                                          // display the form
 
 }
 
-print_footer();
+echo $OUTPUT->footer();
 
 ?>

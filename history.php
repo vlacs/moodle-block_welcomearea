@@ -10,7 +10,7 @@ require_once($CFG->libdir . '/weblib.php');
 
 require_once("$CFG->dirroot/blocks/welcomearea/lib.php");
 
-global $CFG, $USER;
+//global $CFG, $USER, $DB;
 
 $courseid   = optional_param('courseid', 0, PARAM_INT);   // Block passes the course id so we can get some context.
 $default    = optional_param('default', 0, PARAM_BOOL);   // Flag to indicate we want to edit the default welcomearea.
@@ -18,44 +18,75 @@ $set        = optional_param('set', 0, PARAM_INT);        // timestamp of the en
 $ownerid    = optional_param('ownerid', 0, PARAM_INT);    // id of user of message area that is being edited 
 $use_default    = optional_param('use_default', 0, PARAM_INT);    // used to revert to the default
 
-$COURSE = get_record('course', 'id', $courseid);          // COURSE object
+require_login();
 
-$context        = get_context_instance(CONTEXT_COURSE, $courseid);
-$sitecontext    = get_context_instance(CONTEXT_SYSTEM, SITEID);
+if ($courseid == SITEID) {
+    $courseid = 0;
+}
+if ($courseid) {
+    $course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
+    $PAGE->set_course($course);
+    $context = $PAGE->context;
+} else {
+    $context = get_context_instance(CONTEXT_SYSTEM);
+    $PAGE->set_context($context);
+}
+
+$urlparams = array();
+if ($courseid) {
+    $urlparams['courseid'] = $courseid;
+}
+if ($ownerid) {
+    $urlparams['ownerid'] = $ownerid;
+}
+if ($default) {
+    $urlplarams['default'] = $default;
+}
+$url = new moodle_url('/block/welcomarea/edit.php', $urlparams);
+$PAGE->set_url($url);
 
 $title = get_string('historytitle', 'block_welcomearea');
-$nav = array ();
-$nav[] = array( 'name' => $title );
 
-print_header($title, $title, build_navigation($nav));
+$PAGE->set_pagelayout('standard');
+$PAGE->set_title($title);
+$PAGE->set_heading($title);
+$PAGE->navbar->add(get_string('blocks'));
+$PAGE->navbar->add(get_string('pluginname', 'block_welcomearea'));
+$PAGE->navbar->add($title);
+
+echo $OUTPUT->header();
 
 if ($set) {                                                 // if set is non-zero then we're doing a revert operation
 
-    if ((has_capability('moodle/site:doanything', $sitecontext)) ||
+    if ((has_capability('block/welcomearea:managedefault', $context)) ||
             (has_capability('moodle/course:update', $context) and ($USER->id == $ownerid))) {
 
         if (welcomearea_revert($set, $ownerid, $use_default)) {         // attempt to do a revert
 
-            notify(get_string('confirmation', 'block_welcomearea'), 'notifysuccess');     // if it works, give a confirmation
+            echo $OUTPUT->notification(get_string('confirmation', 'block_welcomearea'), 'notifysuccess');     // if it works, give a confirmation
 
         } else {
 
-            notify(get_string('editerror', 'block_welcomearea'));                       // if it doesn't work, give an error message
+            echo $OUTPUT->notification(get_string('editerror', 'block_welcomearea'));                       // if it doesn't work, give an error message
 
         }
 
-        redirect($CFG->wwwroot . '/course/view.php?id=' . $courseid);
+        echo $OUTPUT->continue_button(new moodle_url('/course/view.php', array('id'=>$courseid)));
+        echo $OUTPUT->footer();
+        die;
 
     }
 
-    notify(get_string('error', 'block_welcomearea'));       // if the user is neither a teacher or admin, give them and error
-    redirect($CFG->wwwroot);                                // and get them out of here
+    echo $OUTPUT->notification(get_string('error', 'block_welcomearea'));       // if the user is neither a teacher or admin, give them and error
+    echo $OUTPUT->continue_button(new moodle_url());
+    echo $OUTPUT->footer();
+    die;
 
 }
 
 // if set is 0 then we need to view the history
 
-if ($default and has_capability('moodle/site:doanything', $sitecontext)) {       // admin?
+if ($default and has_capability('block/welcomearea:managedefault', $context)) {       // admin?
 
     welcomearea_links('historydefault', $courseid);     // print the links
 
@@ -65,13 +96,15 @@ if ($default and has_capability('moodle/site:doanything', $sitecontext)) {      
 
 } else {
 
-    notify(get_string('error', 'block_welcomearea'));       // if the user is neither a teacher or admin, give them and error
-    redirect($CFG->wwwroot);                            // and get them out of here
+    echo $OUTPUT->notification(get_string('error', 'block_welcomearea'));       // if the user is neither a teacher or admin, give them and error
+    echo $OUTPUT->continue_button(new moodle_url());
+    echo $OUTPUT->footer();
+    die;
 
 }
 
 welcomearea_history($courseid, $ownerid);          // print the history
 
-print_footer();
+echo $OUTPUT->footer();
 
 ?>
