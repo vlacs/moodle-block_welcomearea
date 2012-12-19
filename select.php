@@ -95,7 +95,7 @@ welcomearea_links('selector', $courseid);                                       
 $select_url = new moodle_url("$CFG->wwwroot/blocks/welcomearea/select.php");
 $select_url->param('courseid', $course->id);
 
-if ($current_rule = $DB->get_record('welcomearearules', array('courseid'=>$courseid))) {        // do we already have a rule for this course
+if ($current_rule = $DB->get_record('block_welcomearearules', array('courseid'=>$courseid))) {        // do we already have a rule for this course
     $select_url->param('remove', 1);                                                    // if so, we'll have to remove the old one
 
     if ($current_rule->nodisplay) {

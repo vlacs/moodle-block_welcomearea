@@ -92,7 +92,7 @@ if($mform->is_cancelled()) {
     }
 
     echo $OUTPUT->notification(get_string('error', 'block_welcomearea'));       // if the user is neither a teacher or admin, give them and error
-    echo $OUTPUT->continue_button(new moodle_url());
+    echo $OUTPUT->continue_button(new moodle_url('/'));
     echo $OUTPUT->footer();
     die;
 
@@ -104,6 +104,10 @@ if($mform->is_cancelled()) {
 
         welcomearea_links('editingdefault', $courseid);         // print our links for editing the default
 
+    } elseif (has_capability('block/welcomearea:managedefault', $context)) {
+        // editing displayed welcome area
+        welcomearea_links('editingmessage', $courseid);
+
     } elseif (has_capability('moodle/course:update', $context) and ($ownerid == $USER->id)) {
 
         welcomearea_links('editingmessage', $courseid);         // print our links for editing personal welcome area
@@ -111,7 +115,7 @@ if($mform->is_cancelled()) {
     } else {
 
         echo $OUTPUT->notification(get_string('error', 'block_welcomearea'));       // if the user is neither a teacher or admin, give them and error
-        echo $OUTPUT->continue_button(new moodle_url());
+        echo $OUTPUT->continue_button(new moodle_url('/'));
         echo $OUTPUT->footer();
         die;
 

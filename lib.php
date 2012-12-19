@@ -8,12 +8,12 @@ function welcomearea_getcontent($teacherid) {
 
     global $CFG, $DB;
 
-    $sql = 'SELECT content FROM {welcomearea} WHERE userid=' . $teacherid . ' ORDER BY timemodified DESC';
+    $sql = 'SELECT content FROM {block_welcomearea} WHERE userid=' . $teacherid . ' ORDER BY timemodified DESC';
 
     if (!$welcomearea = $DB->get_record_sql($sql, null, IGNORE_MULTIPLE)) {   // if we cant get a record
 
         $teacherid = welcomearea_default();
-        $sql = 'SELECT content FROM {welcomearea} WHERE userid=' . $teacherid . ' ORDER BY timemodified DESC';
+        $sql = 'SELECT content FROM {block_welcomearea} WHERE userid=' . $teacherid . ' ORDER BY timemodified DESC';
 
         if (!$welcomearea = $DB->get_record_sql($sql, null, IGNORE_MULTIPLE)) {   // and we cant get the admin-defined default record
 
@@ -35,7 +35,7 @@ function welcomearea_setcontent($teacherid, $welcometext) {
     $dataobject->content = $welcometext;
     $dataobject->timemodified = time();
 
-    return $DB->insert_record('welcomearea', $dataobject, false);
+    return $DB->insert_record('block_welcomearea', $dataobject, false);
 }
 
 function welcomearea_display($blockdisplay=false) {
@@ -46,7 +46,7 @@ function welcomearea_display($blockdisplay=false) {
     $teacherid = welcomearea_default();
     $croles = explode(',', $CFG->coursecontact);
 
-    if ($current_rule = $DB->get_record('welcomearearules', array('courseid' =>$COURSE->id))) {
+    if ($current_rule = $DB->get_record('block_welcomearearules', array('courseid' =>$COURSE->id))) {
         if ($current_rule->nodisplay) {
             return false;
         } else {
@@ -67,16 +67,37 @@ function welcomearea_display($blockdisplay=false) {
     echo('</div>');
 }
 
+// Return the id and name of the user who's welcome area is displayed
+// returns the welcomearea_default if nodisplay is set
+function welcomearea_displayid() {
+    global $CFG, $COURSE, $DB, $USER;
+    $context = get_context_instance(CONTEXT_COURSE, $COURSE->id);
+
+    $displayid = $USER->id;
+    $croles = explode(',', $CFG->coursecontact);
+
+    if ($current_rule = $DB->get_record('block_welcomearearules', array('courseid' =>$COURSE->id))) {
+        if (!$current_rule->nodisplay) {
+            $displayid = $current_rule->ownerid;
+        }
+
+    } elseif ($teachers = get_role_users($croles, $context, true, '', 'r.sortorder ASC, u.lastname ASC')) {
+        $displayid = reset($teachers)->id;
+    }
+
+    return $displayid;
+}
+
 function welcomearea_history($courseid, $teacherid) {
 
     global $CFG, $DB;
 
-    $sql = 'SELECT timemodified, content FROM {welcomearea} WHERE userid=' . $teacherid . ' ORDER BY timemodified DESC';
+    $sql = 'SELECT timemodified, content FROM {block_welcomearea} WHERE userid=' . $teacherid . ' ORDER BY timemodified DESC';
 
     $welcomehistory = $DB->get_records_sql($sql);
 
     $defaultid = welcomearea_default();
-    $welcomehistory[] = $DB->get_record_sql("SELECT timemodified, content, 1 AS default FROM {welcomearea} WHERE userid = $defaultid ORDER BY timemodified DESC", null, IGNORE_MULTIPLE);
+    $welcomehistory[] = $DB->get_record_sql("SELECT timemodified, content, 1 AS default FROM {block_welcomearea} WHERE userid = $defaultid ORDER BY timemodified DESC", null, IGNORE_MULTIPLE);
 
     $history_url = new moodle_url("$CFG->wwwroot/blocks/welcomearea/history.php");
     $history_url->param('courseid', $courseid);
@@ -115,13 +136,13 @@ function welcomearea_revert($timemodified, $teacherid, $default=0) {
     global $CFG, $DB;
 
     if ($default == 0) {
-        if (!$oldrecord = $DB->get_record('welcomearea', array('userid'=>$teacherid, 'timemodified'=>$timemodified))) {
+        if (!$oldrecord = $DB->get_record('block_welcomearea', array('userid'=>$teacherid, 'timemodified'=>$timemodified))) {
             echo("error opening old record"); 
             return false;
         }
     } else {
         $defaultid = welcomearea_default();
-        if (!$oldrecord = $DB->get_record_sql("SELECT timemodified, content, 1 AS default FROM {welcomearea} WHERE userid = $defaultid ORDER BY timemodified DESC", true)) {
+        if (!$oldrecord = $DB->get_record_sql("SELECT timemodified, content, 1 AS default FROM {block_welcomearea} WHERE userid = $defaultid ORDER BY timemodified DESC", true)) {
             echo("error opening old record"); 
         }
     }
@@ -134,7 +155,7 @@ function welcomearea_revert($timemodified, $teacherid, $default=0) {
 
 function welcomearea_links($current, $courseid) {
 
-    global $USER, $CFG;
+    global $USER, $CFG, $DB;
 
     if ($courseid) {
         $context = get_context_instance(CONTEXT_COURSE, $courseid);
@@ -142,18 +163,29 @@ function welcomearea_links($current, $courseid) {
         $context = get_context_instance(CONTEXT_SYSTEM);
     }
 
+    // Find the ownerid to edit, for teachers it is their own id, for 
+    // admins/managers this is the id for the welcome area that is displayed
+    if (has_capability('block/welcomearea:managedefault', $context)) {       // admin?
+        $displayid = welcomearea_displayid();
+    } else {
+        $displayid = $USER->id;
+    }
+    $current_owner = $DB->get_record('user', array('id'=>$displayid));
+    $name = $current_owner->firstname . " " . $current_owner->lastname;
+
+
     $links = "";
 
     $edit_url = new moodle_url("$CFG->wwwroot/blocks/welcomearea/edit.php");
     $edit_url->param('courseid', $courseid);
-    $edit_url->param('ownerid', $USER->id);
+    $edit_url->param('ownerid', $displayid);
 
     $history_url = new moodle_url("$CFG->wwwroot/blocks/welcomearea/history.php");
     $history_url->param('courseid', $courseid);
-    $history_url->param('ownerid', $USER->id);
+    $history_url->param('ownerid', $displayid);
 
-    $links .= "<a href=\"" . $edit_url->out() . "\">" . get_string('editlink', 'block_welcomearea') . "</a>";
-    $links .= " | <a href=\"" . $history_url->out() . "\">" . get_string('historylink', 'block_welcomearea') . "</a>";
+    $links .= "<a href=\"" . $edit_url->out() . "\">" . get_string('editlink', 'block_welcomearea') . " ($name) </a>";
+    $links .= " | <a href=\"" . $history_url->out() . "\">" . get_string('historylink', 'block_welcomearea') . " ($name)</a>";
 
     if (has_capability('block/welcomearea:managedefault', $context)) {       // admin?
         $edit_url->param('ownerid', welcomearea_default());
@@ -186,7 +218,7 @@ function welcomearea_rule_remove($courseid) {
 
     global $CFG, $DB;
 
-    return $DB->delete_records('welcomearearules', array('courseid'=>$courseid));
+    return $DB->delete_records('block_welcomearearules', array('courseid'=>$courseid));
 
 }
 
@@ -198,7 +230,7 @@ function welcomearea_rule($courseid, $ownerid, $nodisplay=0) {
     $dataobject->ownerid = $ownerid;
     $dataobject->nodisplay = $nodisplay;
 
-    return $DB->insert_record('welcomearearules', $dataobject, false);
+    return $DB->insert_record('block_welcomearearules', $dataobject, false);
 }
 
 ?>

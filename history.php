@@ -78,7 +78,7 @@ if ($set) {                                                 // if set is non-zer
     }
 
     echo $OUTPUT->notification(get_string('error', 'block_welcomearea'));       // if the user is neither a teacher or admin, give them and error
-    echo $OUTPUT->continue_button(new moodle_url());
+    echo $OUTPUT->continue_button(new moodle_url('/'));
     echo $OUTPUT->footer();
     die;
 
@@ -90,6 +90,10 @@ if ($default and has_capability('block/welcomearea:managedefault', $context)) { 
 
     welcomearea_links('historydefault', $courseid);     // print the links
 
+} else if (has_capability('block/welcomearea:managedefault', $context)) {
+
+    welcomearea_links('historymessage', $courseid);
+
 } else if (has_capability('moodle/course:update', $context) and ($ownerid == $USER->id)) {            // teacher?
 
     welcomearea_links('historymessage', $courseid);            // print the links
@@ -97,7 +101,7 @@ if ($default and has_capability('block/welcomearea:managedefault', $context)) { 
 } else {
 
     echo $OUTPUT->notification(get_string('error', 'block_welcomearea'));       // if the user is neither a teacher or admin, give them and error
-    echo $OUTPUT->continue_button(new moodle_url());
+    echo $OUTPUT->continue_button(new moodle_url('/'));
     echo $OUTPUT->footer();
     die;
 
