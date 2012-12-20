@@ -59,6 +59,10 @@ if ($default and has_capability('moodle/site:doanything', $sitecontext)) {      
 
     welcomearea_links('historydefault', $courseid);     // print the links
 
+} else if (has_capability('moodle/site:doanything', $sitecontext)) {
+
+    welcomearea_links('historymessage', $courseid);
+
 } else if (has_capability('moodle/course:update', $context) and ($ownerid == $USER->id)) {            // teacher?
 
     welcomearea_links('historymessage', $courseid);            // print the links

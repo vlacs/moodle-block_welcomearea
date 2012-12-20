@@ -66,6 +66,26 @@ function welcomearea_display($blockdisplay=false) {
     echo('</div>');
 }
 
+// Return the id and name of the user who's welcome area is displayed
+// returns the welcomearea_default if nodisplay is set
+function welcomearea_displayid() {
+    global $CFG, $COURSE, $USER;
+    $context = get_context_instance(CONTEXT_COURSE, $COURSE->id);
+
+    $displayid = $USER->id;
+
+    if ($current_rule = get_record('welcomearearules', 'courseid', $COURSE->id)) {
+        if (!$current_rule->nodisplay) {
+            $displayid = $current_rule->ownerid;
+        }
+
+    } elseif ($teachers = get_role_users($CFG->coursemanager, $context, false, 'u.id', 'ra.timemodified ASC')) {
+        $displayid = reset($teachers)->id;
+    }
+
+    return $displayid;
+}
+
 function welcomearea_history($courseid, $teacherid) {
 
     global $CFG;
@@ -143,16 +163,27 @@ function welcomearea_links($current, $courseid) {
 
     $links = "";
 
+    // Find the ownerid to edit, for teachers it is their own id, for 
+    // admins/managers this is the id for the welcome area that is displayed
+    if (has_capability('moodle/site:doanything', get_context_instance(CONTEXT_SYSTEM, SITEID))) {       // is the user an admin?
+        $displayid = welcomearea_displayid();
+    } else {
+        $displayid = $USER->id;
+    }
+    $current_owner = get_record('user', 'id', $displayid);
+    $name = $current_owner->firstname . " " . $current_owner->lastname;
+
+
     $edit_url = new moodle_url("$CFG->wwwroot/blocks/welcomearea/edit.php");
     $edit_url->param('courseid', $courseid);
-    $edit_url->param('ownerid', $USER->id);
+    $edit_url->param('ownerid', $displayid);
 
     $history_url = new moodle_url("$CFG->wwwroot/blocks/welcomearea/history.php");
     $history_url->param('courseid', $courseid);
-    $history_url->param('ownerid', $USER->id);
+    $history_url->param('ownerid', $displayid);
 
-    $links .= "<a href=\"" . $edit_url->out() . "\">" . get_string('editlink', 'block_welcomearea') . "</a>";
-    $links .= " | <a href=\"" . $history_url->out() . "\">" . get_string('historylink', 'block_welcomearea') . "</a>";
+    $links .= "<a href=\"" . $edit_url->out() . "\">" . get_string('editlink', 'block_welcomearea') . " ($name)</a>";
+    $links .= " | <a href=\"" . $history_url->out() . "\">" . get_string('historylink', 'block_welcomearea') . " ($name)</a>";
 
     if (has_capability('moodle/site:doanything', get_context_instance(CONTEXT_SYSTEM, SITEID))) {       // admin?
         $edit_url->param('ownerid', welcomearea_default());

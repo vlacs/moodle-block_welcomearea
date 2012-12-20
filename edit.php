@@ -74,6 +74,10 @@ if($mform->is_cancelled()) {
 
         welcomearea_links('editingdefault', $courseid);         // print our links for editing the default
 
+    } elseif (has_capability('moodle/site:doanything', $sitecontext)) {
+        // editing displayed welcome area
+        welcomearea_links('editingmessage', $courseid);
+
     } elseif (has_capability('moodle/course:update', $context) and ($ownerid == $USER->id)) {
 
         welcomearea_links('editingmessage', $courseid);         // print our links for editing personal welcome area
