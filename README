@@ -11,31 +11,28 @@ By default this welcome area is displayed in the block itself. However the
 block supports displaying the welcome area in a larger block on the course
 page.
 
-To display the welcome area at the top-center of the course add this line to
-moodle/course/view.php:
-
-    require_once($CFG->dirroot . '/blocks/welcomearea/lib.php');
-
-And add this line to moodle/course/format/*/format.php:
-
-    welcomearea_display();
-
-after:
-
-    echo '<td id="middle-column">';
-
-    print_container_start();
-
-In-block display can be turned off in the block settings.
+// Not yet supported in 2.3:
+//To display the welcome area at the top-center of the course add this line to
+//moodle/course/view.php:
+//    require_once($CFG->dirroot . '/blocks/welcomearea/lib.php');
+//And add this line to moodle/course/format/*/format.php:
+//    welcomearea_display();
+//after:
+//    echo '<td id="middle-column">';
+//    print_container_start();
+//In-block display can be turned off in the block settings.
 
 
 Editing the Welcome Area
 
 Edits to the welcome area are made by instructors by following the link in the
 block on any course page they are listed as an instructor for. Once on the edit
-page, changes are made using the WYSIWYG editor. Instructors can also view
+page, changes are made using the editor. Instructors can also view
 their welcome area history by following the link on the edit page. Once on the
 history page, instructors can revert to a previous welcome area.
+
+Administrators and Managers will also be able to go to a course and edit the
+welcome area shown for the course.
 
 
 Default Welcome Area
