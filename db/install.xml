@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="blocks/welcomearea/db" VERSION="20110429" COMMENT="XMLDB file for Moodle blocks/welcomearea"
+<XMLDB PATH="blocks/welcomearea/db" VERSION="20130101" COMMENT="XMLDB file for Moodle blocks/welcomearea"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="welcomearea" COMMENT="Default comment for welcomearea, please edit me" NEXT="welcomearearules">
+    <TABLE NAME="block_welcomearea" COMMENT="Default comment for welcomearea, please edit me" NEXT="block_welcomearearules">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" ENUM="false" NEXT="userid"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" ENUM="false" PREVIOUS="id" NEXT="content"/>
@@ -18,7 +18,7 @@
         <INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="welcomearearules" COMMENT="Default comment for the table, please edit me" PREVIOUS="welcomearea">
+    <TABLE NAME="block_welcomearearules" COMMENT="Default comment for the table, please edit me" PREVIOUS="block_welcomearea">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" ENUM="false" NEXT="courseid"/>
         <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" ENUM="false" PREVIOUS="id" NEXT="ownerid"/>

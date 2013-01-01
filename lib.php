@@ -8,12 +8,12 @@ function welcomearea_getcontent($teacherid) {
 
     global $CFG;
 
-    $sql = 'SELECT content FROM ' . $CFG->prefix . 'welcomearea WHERE userid=' . $teacherid . ' ORDER BY timemodified DESC';
+    $sql = 'SELECT content FROM ' . $CFG->prefix . 'block_welcomearea WHERE userid=' . $teacherid . ' ORDER BY timemodified DESC';
 
     if (!$welcomearea = get_record_sql($sql, true)) {   // if we cant get a record
 
         $teacherid = welcomearea_default();
-        $sql = 'SELECT content FROM ' . $CFG->prefix . 'welcomearea WHERE userid=' . $teacherid . ' ORDER BY timemodified DESC';
+        $sql = 'SELECT content FROM ' . $CFG->prefix . 'block_welcomearea WHERE userid=' . $teacherid . ' ORDER BY timemodified DESC';
 
         if (!$welcomearea = get_record_sql($sql, true)) {   // and we cant get the admin-defined default record
 
@@ -35,7 +35,7 @@ function welcomearea_setcontent($teacherid, $welcometext) {
     $dataobject->content = $welcometext;
     $dataobject->timemodified = time();
 
-    return insert_record('welcomearea', $dataobject, false);
+    return insert_record('block_welcomearea', $dataobject, false);
 }
 
 function welcomearea_display($blockdisplay=false) {
@@ -45,7 +45,7 @@ function welcomearea_display($blockdisplay=false) {
 
     $teacherid = welcomearea_default();
 
-    if ($current_rule = get_record('welcomearearules', 'courseid', $COURSE->id)) {
+    if ($current_rule = get_record('block_welcomearearules', 'courseid', $COURSE->id)) {
         if ($current_rule->nodisplay) {
             return false;
         } else {
@@ -74,7 +74,7 @@ function welcomearea_displayid() {
 
     $displayid = $USER->id;
 
-    if ($current_rule = get_record('welcomearearules', 'courseid', $COURSE->id)) {
+    if ($current_rule = get_record('block_welcomearearules', 'courseid', $COURSE->id)) {
         if (!$current_rule->nodisplay) {
             $displayid = $current_rule->ownerid;
         }
@@ -90,14 +90,14 @@ function welcomearea_history($courseid, $teacherid) {
 
     global $CFG;
 
-    $sql = 'SELECT timemodified, content FROM ' . $CFG->prefix . 'welcomearea WHERE userid=' . $teacherid . ' ORDER BY timemodified DESC';
+    $sql = 'SELECT timemodified, content FROM ' . $CFG->prefix . 'block_welcomearea WHERE userid=' . $teacherid . ' ORDER BY timemodified DESC';
 
     if(!$welcomehistory = get_records_sql($sql)) {
         $welcomehistory = array();
     }
 
     $defaultid = welcomearea_default();
-    $welcomehistory[] = get_record_sql("SELECT timemodified, content, 1 AS default FROM {$CFG->prefix}welcomearea WHERE userid = $defaultid ORDER BY timemodified DESC", true);
+    $welcomehistory[] = get_record_sql("SELECT timemodified, content, 1 AS default FROM {$CFG->prefix}block_welcomearea WHERE userid = $defaultid ORDER BY timemodified DESC", true);
 
     $history_url = new moodle_url("$CFG->wwwroot/blocks/welcomearea/history.php");
     $history_url->param('courseid', $courseid);
@@ -135,13 +135,13 @@ function welcomearea_revert($timemodified, $teacherid, $default=0) {
     global $CFG;
 
     if ($default == 0) {
-        if (!$oldrecord = get_record('welcomearea', 'userid', $teacherid, 'timemodified', $timemodified)) {
+        if (!$oldrecord = get_record('block_welcomearea', 'userid', $teacherid, 'timemodified', $timemodified)) {
             echo("error opening old record"); 
             return false;
         }
     } else {
         $defaultid = welcomearea_default();
-        if (!$oldrecord = get_record_sql("SELECT timemodified, content, 1 AS default FROM {$CFG->prefix}welcomearea WHERE userid = $defaultid ORDER BY timemodified DESC", true)) {
+        if (!$oldrecord = get_record_sql("SELECT timemodified, content, 1 AS default FROM {$CFG->prefix}block_welcomearea WHERE userid = $defaultid ORDER BY timemodified DESC", true)) {
             echo("error opening old record"); 
         }
     }
@@ -216,7 +216,7 @@ function welcomearea_rule_remove($courseid) {
 
     global $CFG;
 
-    return delete_records('welcomearearules', 'courseid', $courseid);
+    return delete_records('block_welcomearearules', 'courseid', $courseid);
 
 }
 
@@ -229,7 +229,7 @@ function welcomearea_rule($courseid, $ownerid, $nodisplay=0) {
     $dataobject->ownerid = $ownerid;
     $dataobject->nodisplay = $nodisplay;
 
-    return insert_record('welcomearearules', $dataobject, false);
+    return insert_record('block_welcomearearules', $dataobject, false);
 
 }
 
