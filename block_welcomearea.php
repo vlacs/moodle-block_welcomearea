@@ -8,7 +8,7 @@ class block_welcomearea extends block_base {
 
     function init() {
         $this->title    = get_string('welcomearea', 'block_welcomearea');
-        $this->version  = 2011042603;
+        $this->version  = 2013010700;
     }
 
     function get_content() {
