@@ -25,3 +25,5 @@ defined('MOODLE_INTERNAL') || die();
 $plugin->version = 2012121800;
 $plugin->requires  = 2012062500;        // Requires this Moodle 2.3
 $plugin->component = 'block_welcomearea';      // Full name of the plugin (used for diagnostics)
+$plugin->maturity = MATURITY_STABLE;
+$plugin->release = '2.3 (Build 2012121800)';
