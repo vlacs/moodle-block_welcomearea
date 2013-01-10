@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -15,4 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * @package     block_welcomearea
+ * @copyright   2010 VLACS
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+defined('MOODLE_INTERNAL') || die();
+
 $plugin->version = 2012121800;
+$plugin->requires  = 2012062500;        // Requires this Moodle 2.3
+$plugin->component = 'block_welcomearea';      // Full name of the plugin (used for diagnostics)
