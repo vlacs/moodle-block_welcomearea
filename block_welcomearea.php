@@ -33,7 +33,11 @@ class block_welcomearea extends block_base {
 
     function init() {
         $this->title    = get_string('welcomearea', 'block_welcomearea');
-        $this->version  = 2013010700;
+
+        # Get version from M&P-compatible version.php
+        $plugin = new object;
+        require(dirname(__FILE__) . "/version.php");
+        $this->version = $plugin->version;
     }
 
     function get_content() {
