@@ -66,7 +66,7 @@ function welcomearea_setcontent($teacherid, $welcometext) {
 function welcomearea_display($blockdisplay=false) {
     global $CFG, $COURSE, $DB;
 
-    $context = get_context_instance(CONTEXT_COURSE, $COURSE->id);
+    $context = context_course::instance($COURSE->id);
 
     $teacherid = welcomearea_default();
     $croles = explode(',', $CFG->coursecontact);
@@ -96,7 +96,7 @@ function welcomearea_display($blockdisplay=false) {
 // returns the welcomearea_default if nodisplay is set
 function welcomearea_displayid() {
     global $CFG, $COURSE, $DB, $USER;
-    $context = get_context_instance(CONTEXT_COURSE, $COURSE->id);
+    $context = context_course::instance($COURSE->id);
 
     $displayid = $USER->id;
     $croles = explode(',', $CFG->coursecontact);
@@ -183,9 +183,9 @@ function welcomearea_links($current, $courseid) {
     global $USER, $CFG, $DB;
 
     if ($courseid) {
-        $context = get_context_instance(CONTEXT_COURSE, $courseid);
+        $context = context_course::instance($courseid);
     } else {
-        $context = get_context_instance(CONTEXT_SYSTEM);
+        $context = context_system::instance();
     }
 
     // Find the ownerid to edit, for teachers it is their own id, for 

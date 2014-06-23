@@ -42,7 +42,7 @@ class block_welcomearea extends block_base {
         $this->content->text    = '';
         $this->content->footer  = '';
 
-        $context = get_context_instance(CONTEXT_COURSE, $COURSE->id);
+        $context = context_course::instance($COURSE->id);
 
         // Find the ownerid to edit, for teachers it is their own id, for 
         // admins/managers this is the id for the welcome area that is displayed
