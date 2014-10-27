@@ -46,7 +46,7 @@ class block_welcomearea extends block_base {
 
         // Find the ownerid to edit, for teachers it is their own id, for 
         // admins/managers this is the id for the welcome area that is displayed
-        if (has_capability('block/welcomearea:managedefault', $context)) {       // admin?
+        if (has_capability('moodle/site:config', context_system::instance())) {       // admin?
             $displayid = welcomearea_displayid();
             $current_owner = $DB->get_record('user', array('id'=>$displayid));
             $name = $current_owner->firstname . " " . $current_owner->lastname;
@@ -73,7 +73,7 @@ class block_welcomearea extends block_base {
             $this->content->text .= "<a href=\"" . $edit_url->out() . "\">" . get_string('editlink', 'block_welcomearea') . " $name</a>";
         }
 
-        if (has_capability('block/welcomearea:managedefault', $context)) {       // is the user an admin? 
+        if (has_capability('moodle/site:config', context_system::instance())) {       // is the user an admin? 
 
             $edit_url->param('ownerid', welcomearea_default());
             $edit_url->param('default', 1);
