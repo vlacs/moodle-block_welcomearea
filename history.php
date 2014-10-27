@@ -89,8 +89,12 @@ if ($set) {                                                 // if set is non-zer
             echo $OUTPUT->notification(get_string('editerror', 'block_welcomearea'));                       // if it doesn't work, give an error message
 
         }
-
-        echo $OUTPUT->continue_button(new moodle_url('/course/view.php', array('id'=>$courseid)));
+        if ($courseid == 0) {
+            $redirecturl = new moodle_url('/');
+        } else {
+            $redirecturl = new moodle_url('/course/view.php', array('id'=>$courseid));
+        }
+        echo $OUTPUT->continue_button($redirecturl);
         echo $OUTPUT->footer();
         die;
 
@@ -130,4 +134,3 @@ welcomearea_history($courseid, $ownerid);          // print the history
 
 echo $OUTPUT->footer();
 
-?>

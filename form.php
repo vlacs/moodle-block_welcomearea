@@ -47,7 +47,9 @@ class welcomearea_form extends moodleform {
         $mform->addRule('text', null, 'required', null, 'client');
 
         $mform->addElement('hidden', 'courseid', 0);
+        $mform->setType('courseid', PARAM_INT);
         $mform->addElement('hidden', 'ownerid', 0);
+        $mform->setType('ownerid', PARAM_INT);
 
         $buttonarray=array();
         $buttonarray[] = &$mform->createElement('submit', 'submitbutton', get_string('savechanges'));
@@ -58,4 +60,3 @@ class welcomearea_form extends moodleform {
     }
 }
 
-?>

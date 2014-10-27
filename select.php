@@ -89,7 +89,12 @@ if ($remove and !$set) {                                                        
     } else {
         echo $OUTPUT->notification(get_string('removeerror', 'block_welcomearea'));                         // if it doesn't work, give an error message
     }
-    echo $OUTPUT->continue_button(new moodle_url('/course/view.php', array('id'=>$courseid)));
+    if ($courseid == 0) {
+        $redirecturl = new moodle_url('/');
+    } else {
+        $redirecturl = new moodle_url('/course/view.php', array('id'=>$courseid));
+    }
+    echo $OUTPUT->continue_button($redirecturl);
     echo $OUTPUT->footer();
     die;
 }
@@ -98,7 +103,12 @@ if ($set) {
     if ($remove) {
         if (!welcomearea_rule_remove($courseid)) {                                  // remove the old rule
             echo $OUTPUT->notification(get_string('removeerror', 'block_welcomearea'));                     // if it doesn't work, give an error message
-            echo $OUTPUT->continue_button(new moodle_url('/course/view.php', array('id'=>$courseid)));
+            if ($courseid == 0) {
+                $redirecturl = new moodle_url('/');
+            } else {
+                $redirecturl = new moodle_url('/course/view.php', array('id'=>$courseid));
+            }
+            echo $OUTPUT->continue_button($redirecturl);
             echo $OUTPUT->footer();
             die;
         }
@@ -106,7 +116,12 @@ if ($set) {
 
     welcomearea_rule($courseid, $ownerid, $nodisplay);
     echo $OUTPUT->notification(get_string('rulesuccess', 'block_welcomearea'), 'notifysuccess');    // if it works, give a confirmation
-    echo $OUTPUT->continue_button(new moodle_url('/course/view.php', array('id'=>$courseid)));
+    if ($courseid == 0) {
+        $redirecturl = new moodle_url('/');
+    } else {
+        $redirecturl = new moodle_url('/course/view.php', array('id'=>$courseid));
+    }
+    echo $OUTPUT->continue_button($redirecturl);
     echo $OUTPUT->footer();
 die;
 }
@@ -114,7 +129,7 @@ die;
 welcomearea_links('selector', $courseid);                                               // get our header/links
 
 $select_url = new moodle_url("$CFG->wwwroot/blocks/welcomearea/select.php");
-$select_url->param('courseid', $course->id);
+$select_url->param('courseid', $courseid);
 
 if ($current_rule = $DB->get_record('block_welcomearearules', array('courseid'=>$courseid))) {        // do we already have a rule for this course
     $select_url->param('remove', 1);                                                    // if so, we'll have to remove the old one
@@ -185,6 +200,5 @@ echo("<a href=\"" . $select_url->out() . "\">");
 echo(get_string('selectnodisplay', 'block_welcomearea'));
 echo("</a>");
 
-$OUTPUT->footer()
+$OUTPUT->footer();
 
-?>

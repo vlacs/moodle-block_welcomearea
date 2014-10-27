@@ -153,4 +153,3 @@ if($mform->is_cancelled()) {
 
 echo $OUTPUT->footer();
 
-?>

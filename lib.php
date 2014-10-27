@@ -258,4 +258,3 @@ function welcomearea_rule($courseid, $ownerid, $nodisplay=0) {
     return $DB->insert_record('block_welcomearearules', $dataobject, false);
 }
 
-?>

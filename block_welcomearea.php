@@ -36,8 +36,8 @@ class block_welcomearea extends block_base {
 
     function get_content() {
 
-        global $CFG, $USER, $COURSE, $OUTPUT, $DB;
-
+        global $CFG, $USER, $COURSE, $OUTPUT, $DB, $PAGE;
+        
         $this->content          = new stdClass;
         $this->content->text    = '';
         $this->content->footer  = '';
@@ -60,7 +60,8 @@ class block_welcomearea extends block_base {
         $edit_url->param('ownerid', $displayid);
 
         if (!isset($CFG->block_welcomearea_block_display) OR $CFG->block_welcomearea_block_display!=0) {
-            if ($welcomearea = welcomearea_display(true)) {
+            if ($welcomearea = welcomearea_display(true)
+                and $PAGE->url->out() != $CFG->httpswwwroot.'/') { // Do not display the welcomearea on the frontpage.
                 $this->content->text .= $welcomearea; 
                 if (has_capability('moodle/course:update', $context)) {    // is the user a teacher ?
                     $this->content->text .= "<hr />";
@@ -97,4 +98,3 @@ class block_welcomearea extends block_base {
 
 }
 
-?>
