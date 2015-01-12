@@ -36,13 +36,8 @@ class welcomearea_form extends moodleform {
 
         $mform =& $this->_form;
 
-        $mform->addElement('editor', 'text', 'Welcome Area', array(
-                    'canUseHtmlEditor'=>'detect',
-                    'rows'  => 25, 
-                    'cols'  => 65, 
-                    'width' => 0,
-                    'height'=> 0, 
-                    'course'=> 0));
+        $mform->addElement('editor', 'text', 'Welcome Area', null, array(
+                    'maxfiles' => EDITOR_UNLIMITED_FILES));
         $mform->setType('text', PARAM_RAW);
         $mform->addRule('text', null, 'required', null, 'client');
 
