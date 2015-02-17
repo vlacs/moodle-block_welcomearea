@@ -60,6 +60,17 @@ $capabilities = array(
 
         'clonepermissionsfrom' => 'moodle/site:manageblocks'    
     ),
+    
+    'block/welcomearea:myaddinstance' => array(
+       'riskbitmask'  => RISK_PERSONAL,
+                'captype'      => 'read',
+                'contextlevel' => CONTEXT_SYSTEM,
+                'archetypes'   => array(
+                        'user' => CAP_ALLOW,
+                ), 
+
+        'clonepermissionsfrom' => 'moodle/my:manageblocks'
+    )
 );
 
 
