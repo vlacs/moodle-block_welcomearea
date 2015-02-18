@@ -26,6 +26,8 @@
 
 $string['pluginname']       = 'Welcome Area Block';
 $string['welcomearea']      = 'Welcome Area Block';
+$string['welcomearea:addinstance'] = 'Add welcomearea block'; 
+$string['welcomearea:myaddinstance'] = 'Add welcomearea block to My'; 
 
 
 // block config text
